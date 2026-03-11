@@ -73,3 +73,12 @@ Created:
 
 - A breakdown table of the 4 files created (file, num of stories, priorities order (e.g. 1-4, 5-8))
 - "**Next step:** `./scripts/ralph/ralph.sh`
+
+
+# 4. Outcome
+
+## Nest Mode (after 24:27.7m)
+
+- Commits: 77
+- Diff: +1,122 lines across 18 files
+
