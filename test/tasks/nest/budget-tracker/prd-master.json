@@ -1,5 +1,0 @@
-{
-  "project": "Budget Tracker",
-  "branchName": "feature/budget-tracker",
-  "description": "A personal budget tracker with SQLite persistence, transaction and category management, monthly spending limits, and a React dashboard with Recharts visualizations."
-}
