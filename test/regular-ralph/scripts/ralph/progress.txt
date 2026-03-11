@@ -6,6 +6,9 @@ Started: Wed Mar 11 16:46:56 +04 2026
 - Use `bun:sqlite` (`import { Database } from 'bun:sqlite'`) for all SQLite access — no external packages
 - All schema migrations use `CREATE TABLE IF NOT EXISTS` for idempotency
 - DB module lives at `src/db.ts` and exports the `db` instance; import with `import "./db"` in `index.ts` to ensure it runs on startup
+- API route modules export a `const routes = { ... } as const` object that gets spread into `Bun.serve({ routes: { ...routeModule } })`
+- With `noUncheckedIndexedAccess: true`, use `req.params["id"] ?? ""` instead of `req.params.id` to avoid TS errors on indexed access
+- Use `db.prepare<Row, Params>("... RETURNING ...").get(...)` for INSERT/UPDATE that need the inserted/updated row back
 
 ## 2026-03-11 - US-001
 - Created `src/db.ts` with `bun:sqlite` Database; opens/creates `budget.db`; creates `categories` and `transactions` tables with `CREATE TABLE IF NOT EXISTS`
@@ -15,4 +18,16 @@ Started: Wed Mar 11 16:46:56 +04 2026
   - `bun:sqlite` is a built-in — no install needed, just `import { Database } from 'bun:sqlite'`
   - `AUTOINCREMENT` used on PKs to avoid ID reuse after deletes
   - Typecheck runs via `bunx tsc --noEmit`
+---
+
+## 2026-03-11 - US-002
+- Created `src/api/categories.ts` exporting `categoryRoutes` with GET/POST on `/api/categories` and PUT/DELETE on `/api/categories/:id`
+- Updated `src/index.ts` to import `categoryRoutes` and spread into `Bun.serve({ routes })`
+- DELETE returns 409 if any transactions reference the category; uses `COUNT(*)` query before delete
+- INSERT/UPDATE use `RETURNING` clause with `db.prepare().get()` to return the created/updated row
+- Files changed: `src/api/categories.ts` (new), `src/index.ts`
+- **Learnings for future iterations:**
+  - `noUncheckedIndexedAccess: true` requires `req.params["id"] ?? ""` pattern for Bun route params
+  - `db.prepare<ReturnType, ParamsType>("SQL RETURNING ...").get(args)` returns the row directly
+  - Route modules work cleanly as `export const xRoutes = { "/path": { GET, POST } } as const` spread into serve routes
 ---
