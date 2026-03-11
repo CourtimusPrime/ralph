@@ -1,0 +1,27 @@
+{
+  "userStories": [
+    {
+      "id": "example-scope-001",
+      "title": "Example user story one",
+      "description": "As a user, I want to do something so that I get value.",
+      "acceptanceCriteria": [
+        "Criterion A is met",
+        "Criterion B is met"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "example-scope-002",
+      "title": "Example user story two",
+      "description": "As a user, I want to do another thing so that I get more value.",
+      "acceptanceCriteria": [
+        "Criterion A is met"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}
