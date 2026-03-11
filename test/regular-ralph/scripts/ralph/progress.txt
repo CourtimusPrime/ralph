@@ -57,3 +57,16 @@ Started: Wed Mar 11 16:46:56 +04 2026
   - Tailwind CDN added to `index.html`; all Tailwind classes work out of the box
   - HMR pattern from original `frontend.tsx` (`import.meta.hot.data.root`) preserved in new `App.tsx`
 ---
+
+## 2026-03-11 - US-005
+- Rewrote `src/frontend/Categories.tsx` with full CRUD UI: list table, inline add form, inline edit form, delete with 409 error handling
+- Categories fetch on mount via `GET /api/categories`; list re-fetches after every create/update/delete
+- Edit opens inline form pre-filled with current values; Save submits `PUT /api/categories/:id`
+- Delete shows "Cannot delete: category has transactions" inline when API returns 409
+- Monthly limit shows '—' when null
+- Files changed: `src/frontend/Categories.tsx`
+- **Learnings for future iterations:**
+  - Use `void fetchX()` pattern in event handlers to avoid floating promise lint issues with async calls
+  - Inline edit replaces the entire row via `editId === cat.id` conditional rendering — clean pattern for row-level editing
+  - Browser verified: add, edit form, 409 delete error all work correctly
+---
