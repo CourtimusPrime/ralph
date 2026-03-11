@@ -138,3 +138,50 @@ export function createTransaction(
 export function deleteTransaction(id: number): void {
   stmtDeleteTransaction.run(id);
 }
+
+export type SpendingByCategory = {
+  categoryId: number;
+  categoryName: string;
+  monthlyLimit: number | null;
+  total: number;
+};
+
+export type MonthlyTotal = {
+  year: number;
+  month: number;
+  total: number;
+};
+
+const stmtGetSpendingByCategory = db.prepare<SpendingByCategory, [string, string]>(
+  `SELECT c.id AS categoryId, c.name AS categoryName, c.monthly_limit AS monthlyLimit,
+          COALESCE(SUM(t.amount), 0) AS total
+   FROM categories c
+   LEFT JOIN transactions t ON t.category_id = c.id AND t.date >= ? AND t.date < ?
+   GROUP BY c.id
+   ORDER BY c.name`
+);
+
+const stmtGetMonthlyTotals = db.prepare<MonthlyTotal, [string]>(
+  `SELECT CAST(strftime('%Y', date) AS INTEGER) AS year,
+          CAST(strftime('%m', date) AS INTEGER) AS month,
+          SUM(amount) AS total
+   FROM transactions
+   WHERE date >= ?
+   GROUP BY strftime('%Y', date), strftime('%m', date)
+   ORDER BY year ASC, month ASC`
+);
+
+export function getSpendingByCategory(year: number, month: number): SpendingByCategory[] {
+  const start = `${year}-${String(month).padStart(2, "0")}-01`;
+  const nextMonth = month === 12 ? 1 : month + 1;
+  const nextYear = month === 12 ? year + 1 : year;
+  const end = `${nextYear}-${String(nextMonth).padStart(2, "0")}-01`;
+  return stmtGetSpendingByCategory.all(start, end);
+}
+
+export function getMonthlyTotals(months = 6): MonthlyTotal[] {
+  const now = new Date();
+  const d = new Date(now.getFullYear(), now.getMonth() - months + 1, 1);
+  const start = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-01`;
+  return stmtGetMonthlyTotals.all(start);
+}
