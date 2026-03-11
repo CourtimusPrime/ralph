@@ -70,3 +70,16 @@ Started: Wed Mar 11 16:46:56 +04 2026
   - Inline edit replaces the entire row via `editId === cat.id` conditional rendering — clean pattern for row-level editing
   - Browser verified: add, edit form, 409 delete error all work correctly
 ---
+
+## 2026-03-11 - US-006
+- Rewrote `src/frontend/Transactions.tsx` with full list/add/delete UI
+- Add form: amount (required), date (defaults to today via `new Date().toISOString().slice(0, 10)`), description (optional), category dropdown (populated from GET /api/categories)
+- Table shows date, description, amount formatted as $X,XXX.XX via `toLocaleString("en-US", { style: "currency", currency: "USD" })`, category_name; ordered newest first from API
+- Delete button removes row immediately via re-fetch after DELETE
+- Files changed: `src/frontend/Transactions.tsx`
+- **Learnings for future iterations:**
+  - `toLocaleString("en-US", { style: "currency", currency: "USD" })` gives correct $X,XXX.XX format
+  - Date input defaults to today with `new Date().toISOString().slice(0, 10)`
+  - Category dropdown must be populated from a separate GET /api/categories fetch — both fetches happen in parallel via dual `useEffect` calls
+  - Browser verified: add, list, delete all work correctly
+---
