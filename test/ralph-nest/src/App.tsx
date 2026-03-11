@@ -3,6 +3,7 @@ import { TransactionList } from "./TransactionList";
 import { AddTransactionForm } from "./AddTransactionForm";
 import { CategoryList } from "./CategoryList";
 import { CategoryForm } from "./CategoryForm";
+import { SpendingByCategoryChart } from "./SpendingByCategoryChart";
 import "./index.css";
 
 type Category = { id: number; name: string; monthly_limit: number | null };
@@ -31,6 +32,8 @@ export function App() {
   return (
     <div className="app">
       <h1>Budget Tracker</h1>
+      <h2>Spending by Category</h2>
+      <SpendingByCategoryChart />
       <h2>Categories</h2>
       {!showCatForm && <button onClick={openAddCategory}>Add Category</button>}
       {showCatForm && (
