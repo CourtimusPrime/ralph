@@ -8,6 +8,8 @@ import {
   createCategory,
   updateCategory,
   deleteCategory,
+  getSpendingByCategory,
+  getMonthlyTotals,
 } from "./db";
 
 const server = serve({
@@ -108,6 +110,24 @@ const server = serve({
         } catch (err) {
           return Response.json({ error: String(err) }, { status: 400 });
         }
+      },
+    },
+
+    "/api/dashboard/spending-by-category": {
+      async GET(req) {
+        const url = new URL(req.url);
+        const now = new Date();
+        const year = parseInt(url.searchParams.get("year") ?? String(now.getFullYear()), 10);
+        const month = parseInt(url.searchParams.get("month") ?? String(now.getMonth() + 1), 10);
+        return Response.json({ data: getSpendingByCategory(year, month) });
+      },
+    },
+
+    "/api/dashboard/monthly-totals": {
+      async GET(req) {
+        const url = new URL(req.url);
+        const months = parseInt(url.searchParams.get("months") ?? "6", 10);
+        return Response.json({ data: getMonthlyTotals(months) });
       },
     },
 
