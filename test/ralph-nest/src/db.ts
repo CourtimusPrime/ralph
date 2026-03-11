@@ -77,3 +77,64 @@ export function deleteCategory(id: number): void {
   }
   stmtDeleteCategory.run(id);
 }
+
+export type Transaction = {
+  id: number;
+  amount: number;
+  date: string;
+  description: string;
+  category_id: number;
+  categoryName: string;
+};
+
+const stmtGetAllTransactions = db.prepare<Transaction, []>(
+  `SELECT t.id, t.amount, t.date, t.description, t.category_id, c.name AS categoryName
+   FROM transactions t
+   JOIN categories c ON c.id = t.category_id
+   ORDER BY t.date DESC`
+);
+
+const stmtGetTransactionsByMonth = db.prepare<Transaction, [string, string]>(
+  `SELECT t.id, t.amount, t.date, t.description, t.category_id, c.name AS categoryName
+   FROM transactions t
+   JOIN categories c ON c.id = t.category_id
+   WHERE t.date >= ? AND t.date < ?
+   ORDER BY t.date DESC`
+);
+
+const stmtInsertTransaction = db.prepare<Transaction, [number, string, string, number]>(
+  `INSERT INTO transactions (amount, date, description, category_id) VALUES (?, ?, ?, ?)
+   RETURNING id, amount, date, description, category_id,
+     (SELECT name FROM categories WHERE id = category_id) AS categoryName`
+);
+
+const stmtDeleteTransaction = db.prepare<void, [number]>(
+  "DELETE FROM transactions WHERE id = ?"
+);
+
+export function getAllTransactions(): Transaction[] {
+  return stmtGetAllTransactions.all();
+}
+
+export function getTransactionsByMonth(year: number, month: number): Transaction[] {
+  const start = `${year}-${String(month).padStart(2, "0")}-01`;
+  const nextMonth = month === 12 ? 1 : month + 1;
+  const nextYear = month === 12 ? year + 1 : year;
+  const end = `${nextYear}-${String(nextMonth).padStart(2, "0")}-01`;
+  return stmtGetTransactionsByMonth.all(start, end);
+}
+
+export function createTransaction(
+  amount: number,
+  date: string,
+  description: string,
+  categoryId: number
+): Transaction {
+  const row = stmtInsertTransaction.get(amount, date, description, categoryId);
+  if (!row) throw new Error("Failed to insert transaction");
+  return row;
+}
+
+export function deleteTransaction(id: number): void {
+  stmtDeleteTransaction.run(id);
+}
