@@ -21,7 +21,7 @@ And pased it as such:
 # 2. Immediate output
 
 ## Regular Ralph (after 1:29m)
-- Created `tasks/prd-budget-tracker.md` (199 lines)
+- Created `tasks/prd-budget-tracker.md` (199 lines, 10 total tasks)
 - Told me:
   - Table breakdown of tasks (total 10)
   - "Let me know if you'd like any stories split further, reordered, or if you're ready to convert this to `prd.json` with `/ralph`"
@@ -33,7 +33,7 @@ And pased it as such:
 
 I skipped reading it and just said "go".
 
-- Created:
+- Created (4 tasks each, 16 total):
   - `tasks/budget-tracker/prd-01-data-layer.md` (67 lines)
   - `tasks/budget-tracker/prd-02-transactions.md` (68 lines)
   - `tasks/budget-tracker/prd-03-categories.md` (64 lines)
