@@ -55,6 +55,9 @@ if [ -f "$PRD_FILE" ] && [ -f "$LAST_BRANCH_FILE" ]; then
     mkdir -p "$ARCHIVE_FOLDER"
     [ -f "$PRD_FILE" ] && cp "$PRD_FILE" "$ARCHIVE_FOLDER/"
     [ -f "$PROGRESS_FILE" ] && cp "$PROGRESS_FILE" "$ARCHIVE_FOLDER/"
+    # Archive bus PRD sub-files if present
+    LAST_SLUG=$(echo "$LAST_BRANCH" | sed 's|.*/||')
+    [ -d "$SCRIPT_DIR/busses/$LAST_SLUG" ] && cp -r "$SCRIPT_DIR/busses/$LAST_SLUG" "$ARCHIVE_FOLDER/"
     echo "   Archived to: $ARCHIVE_FOLDER"
     
     # Reset progress file for new run

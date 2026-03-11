@@ -4,15 +4,20 @@ You are an autonomous coding agent working on a software project.
 
 ## Your Task
 
-1. Read the PRD at `prd.json` (in the same directory as this file)
+1. Read the PRD at `prd.json` (in the same directory as this file):
+   - If `prd.json` has a `userStories` key → **normal mode**: use stories directly from `prd.json`
+   - If `prd.json` has a `busses` key → **bus mode**: read each JSON file listed in `busses` (paths are relative to `scripts/ralph/`); stories live in those sub-files
 2. Read the progress log at `progress.txt` (check Codebase Patterns section first)
 3. Check you're on the correct branch from PRD `branchName`. If not, check it out or create from main.
-4. Pick the **highest priority** user story where `passes: false`
+4. Pick the **highest priority** user story where `passes: false`:
+   - In bus mode: consider stories from all bus files; process busses in array order (complete all stories in `busses[0]` before starting `busses[1]`); pick lowest `priority` value where `passes: false` across all files
 5. Implement that single user story
 6. Run quality checks (e.g., typecheck, lint, test - use whatever your project requires)
 7. Update CLAUDE.md files if you discover reusable patterns (see below)
 8. If checks pass, commit ALL changes with message: `feat: [Story ID] - [Story Title]`
-9. Update the PRD to set `passes: true` for the completed story
+9. Update the PRD to set `passes: true` for the completed story:
+   - **Normal mode**: write `passes: true` to `prd.json` as before
+   - **Bus mode**: write `passes: true` to the specific bus sub-file that contains the story — never modify `prd.json`
 10. Append your progress to `progress.txt`
 
 ## Progress Report Format
@@ -90,6 +95,9 @@ If no browser tools are available, note in your progress report that manual brow
 ## Stop Condition
 
 After completing a user story, check if ALL stories have `passes: true`.
+
+- **Normal mode**: check `prd.json` directly
+- **Bus mode**: check all stories across all bus files listed in `prd.json`'s `busses` array
 
 If ALL stories are complete and passing, reply with:
 <promise>COMPLETE</promise>
