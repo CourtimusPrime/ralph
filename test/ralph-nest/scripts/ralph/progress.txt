@@ -11,6 +11,17 @@
 Started: Wed Mar 11 16:46:29 +04 2026
 ---
 
+## 2026-03-11 - categories-002
+- Created `src/CategoryList.tsx` with table showing name and monthly limit
+- Fetches both `/api/categories` and `/api/transactions` to determine which category IDs are in use
+- Delete button disabled with title tooltip "Category has transactions" for those IDs
+- Empty state: "No categories yet"
+- Files changed: `src/CategoryList.tsx`, `src/App.tsx`
+- **Learnings for future iterations:**
+  - Fetch both `/api/categories` and `/api/transactions` in parallel via `Promise.all` to determine used category IDs
+  - `disabled` + `title` attributes on `<button>` provide tooltip-on-hover for accessibility
+---
+
 ## 2026-03-11 - categories-001
 - Added `POST /api/categories`, `PUT /api/categories/:id`, `DELETE /api/categories/:id` routes to `src/index.ts`
 - DELETE returns `400 { error: "Category has transactions" }` when category is referenced
