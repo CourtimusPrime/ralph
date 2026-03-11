@@ -2,17 +2,48 @@ import { useState } from "react";
 import { TransactionList } from "./TransactionList";
 import { AddTransactionForm } from "./AddTransactionForm";
 import { CategoryList } from "./CategoryList";
+import { CategoryForm } from "./CategoryForm";
 import "./index.css";
+
+type Category = { id: number; name: string; monthly_limit: number | null };
 
 export function App() {
   const [txRefreshKey, setTxRefreshKey] = useState(0);
   const [catRefreshKey, setCatRefreshKey] = useState(0);
+  const [showCatForm, setShowCatForm] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+
+  function openAddCategory() {
+    setEditingCategory(null);
+    setShowCatForm(true);
+  }
+
+  function openEditCategory(cat: Category) {
+    setEditingCategory(cat);
+    setShowCatForm(true);
+  }
+
+  function closeCatForm() {
+    setShowCatForm(false);
+    setEditingCategory(null);
+  }
 
   return (
     <div className="app">
       <h1>Budget Tracker</h1>
       <h2>Categories</h2>
-      <CategoryList refreshKey={catRefreshKey} />
+      {!showCatForm && <button onClick={openAddCategory}>Add Category</button>}
+      {showCatForm && (
+        <CategoryForm
+          editing={editingCategory}
+          onSaved={() => { closeCatForm(); setCatRefreshKey(k => k + 1); }}
+          onCancel={closeCatForm}
+        />
+      )}
+      <CategoryList
+        refreshKey={catRefreshKey}
+        onEdit={openEditCategory}
+      />
       <h2>Add Transaction</h2>
       <AddTransactionForm onAdded={() => setTxRefreshKey(k => k + 1)} />
       <h2>Transactions</h2>
