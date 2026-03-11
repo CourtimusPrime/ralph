@@ -31,3 +31,29 @@ Started: Wed Mar 11 16:46:56 +04 2026
   - `db.prepare<ReturnType, ParamsType>("SQL RETURNING ...").get(args)` returns the row directly
   - Route modules work cleanly as `export const xRoutes = { "/path": { GET, POST } } as const` spread into serve routes
 ---
+
+## 2026-03-11 - US-003
+- Created `src/api/transactions.ts` exporting `transactionRoutes` with GET/POST on `/api/transactions` and DELETE on `/api/transactions/:id`
+- GET supports optional `?month=YYYY-MM` query param using `LIKE 'YYYY-MM%'` filter on date column
+- Response includes `category_name` via LEFT JOIN on categories table
+- Updated `src/index.ts` to import `transactionRoutes` and spread into `Bun.serve({ routes })`
+- Files changed: `src/api/transactions.ts` (new), `src/index.ts`
+- **Learnings for future iterations:**
+  - Use `new URL(req.url).searchParams.get("month")` to read query params in Bun route handlers
+  - Month filtering: `WHERE t.date LIKE ?` with param `'YYYY-MM%'` works cleanly for ISO-8601 date strings
+  - JOIN category name in the SELECT so frontend gets denormalized data in one request
+---
+
+## 2026-03-11 - US-004
+- Updated `src/index.html` to add Tailwind CDN via `<script src="https://cdn.tailwindcss.com">` and point to `src/frontend/App.tsx`
+- Created `src/frontend/App.tsx` as the new entry point with React tab navigation (Dashboard, Transactions, Categories)
+- Created placeholder page components: `src/frontend/Dashboard.tsx`, `src/frontend/Transactions.tsx`, `src/frontend/Categories.tsx`
+- Active tab uses `bg-indigo-100 text-indigo-700` Tailwind classes; inactive tabs use `text-gray-600`
+- Tab switching is client-side React state — no full page reload
+- Browser verified: all three tabs render and switch correctly
+- Files changed: `src/index.html`, `src/frontend/App.tsx` (new), `src/frontend/Dashboard.tsx` (new), `src/frontend/Transactions.tsx` (new), `src/frontend/Categories.tsx` (new)
+- **Learnings for future iterations:**
+  - Frontend entry point moved from `src/frontend.tsx` to `src/frontend/App.tsx` — future UI stories should edit files in `src/frontend/`
+  - Tailwind CDN added to `index.html`; all Tailwind classes work out of the box
+  - HMR pattern from original `frontend.tsx` (`import.meta.hot.data.root`) preserved in new `App.tsx`
+---
