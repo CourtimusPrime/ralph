@@ -11,6 +11,13 @@
 Started: Wed Mar 11 16:46:29 +04 2026
 ---
 
+## 2026-03-11 - categories-001
+- Added `POST /api/categories`, `PUT /api/categories/:id`, `DELETE /api/categories/:id` routes to `src/index.ts`
+- DELETE returns `400 { error: "Category has transactions" }` when category is referenced
+- Imported `createCategory`, `updateCategory`, `deleteCategory` from `./db`
+- Files changed: `src/index.ts`
+---
+
 ## 2026-03-11 - transactions-004
 - Updated `src/TransactionList.tsx` to handle DELETE API call internally with `handleDelete(id)`
 - On success: removes row from local state without re-fetch
