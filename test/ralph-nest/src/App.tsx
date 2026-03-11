@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { TransactionList } from "./TransactionList";
+import { AddTransactionForm } from "./AddTransactionForm";
 import "./index.css";
 
 export function App() {
@@ -8,6 +9,8 @@ export function App() {
   return (
     <div className="app">
       <h1>Budget Tracker</h1>
+      <h2>Add Transaction</h2>
+      <AddTransactionForm onAdded={() => setRefreshKey(k => k + 1)} />
       <h2>Transactions</h2>
       <TransactionList
         refreshKey={refreshKey}
