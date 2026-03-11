@@ -1,6 +1,6 @@
 # tasks/
 
-This directory holds the source PRD files for the **compilation step** — a preprocessing stage that merges multiple scoped `prd-*.json` files into a single flat `prd.json` before Ralph runs.
+This directory holds the source PRD files for **nested mode** — a preprocessing stage that merges multiple scoped `prd-*.json` files into a single flat `prd.json` before Ralph runs.
 
 Instead of maintaining one monolithic PRD, you can split user stories into focused sub-PRD files by feature area, then merge them on demand. The `merge-prds.sh` script handles discovery, namespacing, priority assignment, and preservation of completed work across re-merges.
 
@@ -85,7 +85,7 @@ The `prd.json` file is the source of truth for pass/fail status — `passes` val
 ## Standard usage
 
 ```bash
-# Compile sub-PRDs into prd.json, then start Ralph
+# Nest sub-PRDs into prd.json, then start Ralph
 ./merge-prds.sh && ./ralph.sh
 ```
 
