@@ -1,0 +1,58 @@
+## Codebase Patterns
+- Use `bun:sqlite` with `Database` from `bun:sqlite` for all SQLite operations
+- Always use `IF NOT EXISTS` in CREATE TABLE migrations
+- All DB code lives in `src/db.ts`
+- Use `db.prepare<ReturnType, ParamsType>()` for type-safe prepared statements; `stmt.get()` for single rows, `stmt.all()` for arrays
+- Use `RETURNING` clause in INSERT/UPDATE to get the row back in one query; use a subquery inside `RETURNING` to include joined data (e.g. `categoryName`) without a second query
+- For aggregations with LEFT JOIN + GROUP BY, use `COALESCE(SUM(...), 0)` to return 0 instead of NULL for categories/months with no transactions
+- For date-range month filtering, compute `start` and `end` ISO dates in TypeScript and pass as parameters (same pattern as `getTransactionsByMonth`)
+
+# Ralph Progress Log
+Started: Wed Mar 11 16:46:29 +04 2026
+---
+
+## 2026-03-11 - data-layer-004
+- Added `SpendingByCategory` and `MonthlyTotal` types exported from `src/db.ts`
+- Implemented `getSpendingByCategory(year, month)` with a LEFT JOIN + GROUP BY on categories; uses `COALESCE(SUM(...), 0)` for categories with no transactions
+- Implemented `getMonthlyTotals(months?)` with GROUP BY strftime year/month filtered to last N months; start date computed in TypeScript
+- Both functions use a single prepared statement (no N+1 loops)
+- Files changed: `src/db.ts`
+- **Learnings for future iterations:**
+  - `new Date(year, month - months + 1, 1)` handles month underflow correctly (JS Date wraps negative months to prior year)
+  - `CAST(strftime('%Y', date) AS INTEGER)` converts SQLite text year to a number for the return type
+  - `getSpendingByCategory` uses the same ISO date range pattern as `getTransactionsByMonth`
+---
+
+## 2026-03-11 - data-layer-003
+- Added `Transaction` TypeScript type (including `categoryName: string`) exported from `src/db.ts`
+- Implemented `getAllTransactions()`, `getTransactionsByMonth()`, `createTransaction()`, `deleteTransaction()` using prepared statements
+- `getAllTransactions()` and `getTransactionsByMonth()` JOIN `categories` to include `categoryName`
+- `createTransaction()` uses a subquery in `RETURNING` to get `categoryName` in one query
+- Files changed: `src/db.ts`
+- **Learnings for future iterations:**
+  - Use a subquery in the `RETURNING` clause to join related data without a second query: `RETURNING ..., (SELECT name FROM categories WHERE id = category_id) AS categoryName`
+  - `getTransactionsByMonth` uses ISO 8601 string range comparison (`date >= start AND date < end`) for month filtering
+---
+
+## 2026-03-11 - data-layer-002
+- Added `Category` TypeScript type exported from `src/db.ts`
+- Implemented `getAllCategories()`, `getCategoryById()`, `createCategory()`, `updateCategory()`, `deleteCategory()` using prepared statements
+- `deleteCategory()` throws a descriptive error if transactions reference the category
+- Files changed: `src/db.ts`
+- **Learnings for future iterations:**
+  - `db.prepare<ReturnType, ParamsType>()` provides full type safety for queries
+  - Use `stmt.get()` for single-row returns; use `stmt.all()` for array returns
+  - `RETURNING` clause in INSERT/UPDATE lets you get the row back without a second query
+---
+
+## 2026-03-11 - data-layer-001
+- Created `src/db.ts` with `bun:sqlite` Database initialization
+- Created `categories` table (id, name UNIQUE, monthly_limit nullable)
+- Created `transactions` table (id, amount, date, description, category_id FK)
+- Both tables use `IF NOT EXISTS` guards
+- Files changed: `src/db.ts`
+- **Learnings for future iterations:**
+  - `bun:sqlite` Database constructor accepts a filename and creates the file automatically
+  - `db.run()` is used for DDL statements
+  - Migration is safe to re-run due to `IF NOT EXISTS` guards
+---
