@@ -1,0 +1,69 @@
+{
+  "scope": "Categories",
+  "source": "tasks/budget-tracker/prd-03-categories.md",
+  "userStories": [
+    {
+      "id": "categories-001",
+      "title": "Category API routes",
+      "description": "As a developer, I want REST API routes for categories so that the React frontend can create, update, and delete categories over HTTP.",
+      "acceptanceCriteria": [
+        "`POST /api/categories` accepts `{ name, monthlyLimit? }`, validates input, calls `createCategory()`, returns the new row",
+        "`PUT /api/categories/:id` accepts `{ name, monthlyLimit? }`, validates input, calls `updateCategory()`, returns the updated row",
+        "`DELETE /api/categories/:id` calls `deleteCategory(id)`; if the category has transactions, returns `400 { error: \"Category has transactions\" }`; otherwise returns `{ ok: true }`",
+        "All routes return JSON; errors return `{ error: string }` with an appropriate status code",
+        "Typecheck/lint passes"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "categories-002",
+      "title": "Category list view",
+      "description": "As a user, I want to see all my categories in a list so that I can understand what spending buckets I have.",
+      "acceptanceCriteria": [
+        "List displays each category's name and monthly limit (or \"No limit\" if unset)",
+        "Each row has Edit and Delete buttons",
+        "Delete button is disabled (with tooltip \"Category has transactions\") if the category cannot be deleted",
+        "Empty state shown when no categories exist (\"No categories yet\")",
+        "Typecheck/lint passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "categories-003",
+      "title": "Add and edit category form",
+      "description": "As a user, I want to add a new category or edit an existing one so that I can organize my spending.",
+      "acceptanceCriteria": [
+        "\"Add Category\" button opens an inline form (or modal) with Name and Monthly Limit fields",
+        "Monthly Limit is optional; leaving it blank stores `null`",
+        "Clicking Edit on a row populates the same form with existing values",
+        "On save, list refreshes and form closes without a full page reload",
+        "Name uniqueness error from the API is shown inline (\"Category name already exists\")",
+        "Typecheck/lint passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "categories-004",
+      "title": "Delete category",
+      "description": "As a user, I want to delete a category so that I can remove unused spending buckets.",
+      "acceptanceCriteria": [
+        "Clicking Delete calls `DELETE /api/categories/:id`",
+        "On success, category is removed from the list without a full page reload",
+        "If the API returns 400 (has transactions), an error message is shown inline",
+        "Typecheck/lint passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 12,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}

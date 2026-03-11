@@ -1,0 +1,71 @@
+{
+  "scope": "Data Layer",
+  "source": "tasks/budget-tracker/prd-01-data-layer.md",
+  "userStories": [
+    {
+      "id": "data-layer-001",
+      "title": "Initialize database schema",
+      "description": "As a developer, I want the database to be created and migrated automatically on startup so that the app works out of the box with no manual setup.",
+      "acceptanceCriteria": [
+        "`db.ts` creates (or opens) `budget.db` using `bun:sqlite`",
+        "`categories` table: `id INTEGER PRIMARY KEY`, `name TEXT NOT NULL UNIQUE`, `monthly_limit REAL` (nullable)",
+        "`transactions` table: `id INTEGER PRIMARY KEY`, `amount REAL NOT NULL`, `date TEXT NOT NULL` (ISO 8601), `description TEXT NOT NULL`, `category_id INTEGER NOT NULL REFERENCES categories(id) ON DELETE RESTRICT`",
+        "Migration runs with `IF NOT EXISTS` guards so re-running is safe",
+        "Typecheck/lint passes"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "data-layer-002",
+      "title": "Category data access functions",
+      "description": "As a developer, I want typed functions to create, read, update, and delete categories so that all category persistence is centralized.",
+      "acceptanceCriteria": [
+        "`getAllCategories()` returns `Category[]` ordered by name",
+        "`getCategoryById(id)` returns `Category | null`",
+        "`createCategory(name, monthlyLimit?)` inserts and returns the new row",
+        "`updateCategory(id, name, monthlyLimit?)` updates and returns the updated row",
+        "`deleteCategory(id)` throws a descriptive error if any transactions reference it",
+        "All functions use prepared statements",
+        "TypeScript `Category` type exported from `db.ts`",
+        "Typecheck/lint passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "data-layer-003",
+      "title": "Transaction data access functions",
+      "description": "As a developer, I want typed functions to create, read, and delete transactions so that all transaction persistence is centralized.",
+      "acceptanceCriteria": [
+        "`getAllTransactions()` returns `Transaction[]` ordered by date descending, with `categoryName` joined",
+        "`getTransactionsByMonth(year, month)` returns transactions for that calendar month",
+        "`createTransaction(amount, date, description, categoryId)` inserts and returns the new row",
+        "`deleteTransaction(id)` removes the row",
+        "TypeScript `Transaction` type (including `categoryName: string`) exported from `db.ts`",
+        "All functions use prepared statements",
+        "Typecheck/lint passes"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "data-layer-004",
+      "title": "Spending aggregation queries",
+      "description": "As a developer, I want query functions that aggregate spending data so that the dashboard can display charts and limit comparisons without doing math in the UI layer.",
+      "acceptanceCriteria": [
+        "`getSpendingByCategory(year, month)` returns `{ categoryId, categoryName, monthlyLimit, total }[]`",
+        "`getMonthlyTotals(months?)` returns the last N calendar months (default 6) as `{ year, month, total }[]` ordered oldest-first",
+        "Both functions use a single SQL query each (no N+1 loops)",
+        "Return types exported from `db.ts`",
+        "Typecheck/lint passes"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}
