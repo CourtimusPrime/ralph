@@ -12,13 +12,7 @@ export function App() {
       <h2>Add Transaction</h2>
       <AddTransactionForm onAdded={() => setRefreshKey(k => k + 1)} />
       <h2>Transactions</h2>
-      <TransactionList
-        refreshKey={refreshKey}
-        onDelete={async (id) => {
-          await fetch(`/api/transactions/${id}`, { method: "DELETE" });
-          setRefreshKey(k => k + 1);
-        }}
-      />
+      <TransactionList refreshKey={refreshKey} />
     </div>
   );
 }
