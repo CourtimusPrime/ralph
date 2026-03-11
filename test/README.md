@@ -20,13 +20,13 @@ And pased it as such:
 
 # 2. Immediate output
 
-## Regular Ralph
-- Created `tasks/prd-budget-tracker.md` (198 lines)
+## Regular Ralph (after 1:29m)
+- Created `tasks/prd-budget-tracker.md` (199 lines)
 - Told me:
   - Table breakdown of tasks (total 10)
   - "Let me know if you'd like any stories split further, reordered, or if you're ready to convert this to `prd.json` with `/ralph`"
 
-## Ralph Nest
+## Ralph Nest (after 1:28m)
 
 - Gave me a summary of what it'll do
 - Asked me to change it or send "go"
@@ -34,28 +34,42 @@ And pased it as such:
 I skipped reading it and just said "go".
 
 - Created:
-  - `tasks/budget-tracker/prd-01-data-layer.md` (198 lines)
-  - `tasks/budget-tracker/prd-02-transactions.md` (67 lines)
-  - `tasks/budget-tracker/prd-03-categories.md` (63 lines)
-  - `tasks/budget-tracker/prd-04-dashboard.md` (70 lines)
+  - `tasks/budget-tracker/prd-01-data-layer.md` (67 lines)
+  - `tasks/budget-tracker/prd-02-transactions.md` (68 lines)
+  - `tasks/budget-tracker/prd-03-categories.md` (64 lines)
+  - `tasks/budget-tracker/prd-04-dashboard.md` (71 lines)
 
 - Told me:
   - A table breakdown of the four files created
   - Next steps including:
     1. Review and edit the files in `tasks/budget-tracker/`
-    2. Run: `ralph tasks/budget-tracker` (compiles into `scripts/ralph/prd.json`)
+    2. Run: `ralph-nest tasks/budget-tracker` (compiles into `scripts/ralph/prd.json`)
     3. Run: `./scripts/ralph/ralph.sh`
 
 # 3. Created prd's
 
-## Regular Ralph
+## Regular Ralph (after 53s)
 
 ```bash
 /ralph @tasks/prd-budget-tracker.md
 ```
 
-## Nest Mode
+Created:
+- Created `scripts/ralph/prd.json` (175 lines)
+- Table of 10 tasks 
+
+## Nest Mode (after 2:04m)
 
 ```bash
-/ralph @tasks/budget-tracker/
+/ralph-nest @tasks/budget-tracker/
 ```
+
+Created: 
+- `scripts/ralph/prd.json` (12 lines)
+- `scripts/ralph/nests/budget-tracker/prd-01-data-layer.json` (72 lines)
+- `scripts/ralph/nests/budget-tracker/prd-02-transactions.json` (72 lines)
+- `scripts/ralph/nests/budget-tracker/prd-03-categories.json` (70 lines)
+- `scripts/ralph/nests/budget-tracker/prd-04-dashboard.json` (72 lines)
+
+- A breakdown table of the 4 files created (file, num of stories, priorities order (e.g. 1-4, 5-8))
+- "**Next step:** `./scripts/ralph/ralph.sh`
