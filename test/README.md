@@ -1,21 +1,7 @@
-# bun-react-template
+# Tests
 
-To install dependencies:
+## 1. Personal Budget Tracker
 
-```bash
-bun install
+```markdown
+/nest "Create a personal budget tracker that stores transactions, lets users add/delete transactions, lets users add/edit categories, set monthly limits per category, add over-budget alerts, featuring a dashboard with spending charts, category breakdowns, and month-over-month summaries"
 ```
-
-To start a development server:
-
-```bash
-bun dev
-```
-
-To run for production:
-
-```bash
-bun start
-```
-
-This project was created using `bun init` in bun v1.3.5. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
