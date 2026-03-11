@@ -1,8 +1,16 @@
 #!/bin/bash
 # merge-prds.sh - Merge multiple prd-*.json files in tasks/ into a single prd.json
-# Usage: ./merge-prds.sh
+# Usage: ./merge-prds.sh [--dry-run]
 
 set -eo pipefail
+
+DRY_RUN=false
+for arg in "$@"; do
+  case "$arg" in
+    --dry-run) DRY_RUN=true ;;
+    *) echo "Error: Unknown argument: $arg" >&2; exit 1 ;;
+  esac
+done
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TASKS_DIR="$SCRIPT_DIR/tasks"
@@ -105,13 +113,18 @@ ALL_STORIES=$(jq -n \
   --argjson passed "$OLD_PASSED_IDS" \
   '$stories | map(. + {passes: ($passed[.id] // false)})')
 
-# Build and write the final prd.json
-jq -n \
+# Build the final prd.json content
+FINAL_JSON=$(jq -n \
   --arg project "$PROJECT" \
   --arg branchName "$BRANCH_NAME" \
   --arg description "$DESCRIPTION" \
   --argjson userStories "$ALL_STORIES" \
-  '{project: $project, branchName: $branchName, description: $description, userStories: $userStories}' \
-  > "$OUTPUT_FILE"
+  '{project: $project, branchName: $branchName, description: $description, userStories: $userStories}')
 
-echo "Merged $STORY_COUNT stories from $FILE_COUNT files into prd.json"
+if [ "$DRY_RUN" = true ]; then
+  echo "$FINAL_JSON"
+  echo "[dry-run] Would merge $STORY_COUNT stories from $FILE_COUNT files" >&2
+else
+  echo "$FINAL_JSON" > "$OUTPUT_FILE"
+  echo "Merged $STORY_COUNT stories from $FILE_COUNT files into prd.json"
+fi
