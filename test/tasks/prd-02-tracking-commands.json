@@ -1,0 +1,65 @@
+{
+  "userStories": [
+    {
+      "id": "001",
+      "title": "Implement devtimer start command",
+      "description": "As a developer, I want to run 'devtimer start' to begin logging a coding session for the current repo.",
+      "acceptanceCriteria": [
+        "Running 'devtimer start' inside a git repo inserts a row in sessions with started_at = now() and ended_at = null",
+        "Project is auto-registered if not seen before (uses get_or_create_project)",
+        "Prints: 'Started session for <project-name> at <HH:MM>'",
+        "If a session is already active for this project, prints an error: 'Session already active for <project-name>. Run devtimer stop first.' and exits non-zero",
+        "Running outside a git repo prints: 'Not inside a git repository' and exits non-zero",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "002",
+      "title": "Implement devtimer stop command",
+      "description": "As a developer, I want to run 'devtimer stop' to close the active session and record how long I worked.",
+      "acceptanceCriteria": [
+        "Running 'devtimer stop' sets ended_at = now() on the most recent open session for the current project",
+        "Prints: 'Stopped. Session duration: <Xh Ym>'",
+        "If no active session exists, prints: 'No active session for <project-name>' and exits non-zero",
+        "Accepts optional --note flag: 'devtimer stop --note \"Fixed login bug\"' saves the note text to the sessions.notes column",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "003",
+      "title": "Implement devtimer status command",
+      "description": "As a developer, I want to run 'devtimer status' to see whether a session is currently active.",
+      "acceptanceCriteria": [
+        "If a session is active: prints 'Active session: <project-name> — running for <Xh Ym> (started <HH:MM>)'",
+        "If no session is active: prints 'No active session'",
+        "Works correctly even when run from a directory that is not a git repo",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "004",
+      "title": "Implement devtimer log command",
+      "description": "As a developer, I want to run 'devtimer log' to review my recent sessions in a readable table.",
+      "acceptanceCriteria": [
+        "Prints the 10 most recent completed sessions as a table with columns: Date, Project, Duration, Notes",
+        "Duration formats as '1h 23m' or '45m' (no hours if under 60 min)",
+        "In-progress sessions are shown with duration '(in progress)' and no ended_at",
+        "Accepts optional --project flag to filter by project name: 'devtimer log --project myapp'",
+        "Accepts optional --limit flag to change result count: 'devtimer log --limit 25'",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}

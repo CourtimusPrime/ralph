@@ -1,0 +1,5 @@
+{
+  "project": "DevTimer",
+  "branchName": "feature/dev-time-tracker",
+  "description": "Lightweight CLI dev time tracker that auto-detects the current git repo and logs coding sessions to a local SQLite database"
+}
