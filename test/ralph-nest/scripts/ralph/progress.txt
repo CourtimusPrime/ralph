@@ -11,6 +11,18 @@
 Started: Wed Mar 11 16:46:29 +04 2026
 ---
 
+## 2026-03-11 - transactions-003
+- Created `src/AddTransactionForm.tsx` with Amount (number), Date (date picker, defaults today), Description, Category (select from API) fields
+- Client-side validation on submit; inline error messages per field
+- On success: form resets and calls `onAdded()` to trigger list refresh
+- On API error: displays error message inline
+- Updated `src/App.tsx` to include the form above the transaction list
+- Files changed: `src/AddTransactionForm.tsx`, `src/App.tsx`
+- **Learnings for future iterations:**
+  - Date input default: `new Date().toISOString().slice(0, 10)` gives YYYY-MM-DD
+  - Fetch categories in form's own `useEffect` rather than passing as prop
+---
+
 ## 2026-03-11 - transactions-002
 - Created `src/TransactionList.tsx` with table of transactions (Date, Description, Category, Amount columns)
 - Amount formatted as `$X.XX` using `toFixed(2)`; date displayed as-is (already ISO YYYY-MM-DD)
