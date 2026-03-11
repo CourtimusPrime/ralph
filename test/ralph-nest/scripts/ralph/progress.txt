@@ -11,6 +11,13 @@
 Started: Wed Mar 11 16:46:29 +04 2026
 ---
 
+## 2026-03-11 - categories-004
+- Delete category functionality already implemented in `CategoryList.tsx` (story categories-002)
+- Verified: DELETE call, row removal on success, inline error on 400, typecheck passes
+- No code changes needed
+- Files changed: none (marking complete)
+---
+
 ## 2026-03-11 - categories-003
 - Created `src/CategoryForm.tsx` with Name and optional Monthly Limit fields
 - `useEffect` pre-populates fields when `editing` prop is set
