@@ -11,6 +11,19 @@
 Started: Wed Mar 11 16:46:29 +04 2026
 ---
 
+## 2026-03-11 - transactions-002
+- Created `src/TransactionList.tsx` with table of transactions (Date, Description, Category, Amount columns)
+- Amount formatted as `$X.XX` using `toFixed(2)`; date displayed as-is (already ISO YYYY-MM-DD)
+- Empty state shows "No transactions yet"
+- Each row has a Delete button that calls an `onDelete` prop
+- Updated `src/App.tsx` to render `TransactionList` with delete handler
+- Files changed: `src/TransactionList.tsx`, `src/App.tsx`
+- **Learnings for future iterations:**
+  - `refreshKey` prop pattern: increment an integer state to re-trigger `useEffect` fetch
+  - Pass `onDelete` as a prop from App so TransactionList stays a pure display component
+  - Browser verification: manual browser check needed (no dev-browser tool available)
+---
+
 ## 2026-03-11 - transactions-001
 - Added `GET /api/categories`, `GET /api/transactions`, `POST /api/transactions`, `DELETE /api/transactions/:id` routes to `src/index.ts`
 - Input validation on POST: amount (number), date (string), description (string), categoryId (number)
