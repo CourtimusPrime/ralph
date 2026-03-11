@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { BudgetAlerts } from "./BudgetAlerts";
 import { SpendingChart } from "./SpendingChart";
 import { MonthOverMonthChart } from "./MonthOverMonthChart";
+import { CategoryBreakdownTable } from "./CategoryBreakdownTable";
 
 interface Category {
   id: number;
@@ -24,12 +25,19 @@ interface OverBudgetEntry {
   actual: number;
 }
 
+interface CategoryRow {
+  name: string;
+  monthly_limit: number | null;
+  spent: number;
+}
+
 function getCurrentMonth(): string {
   return new Date().toISOString().slice(0, 7);
 }
 
 export function Dashboard() {
   const [overBudget, setOverBudget] = useState<OverBudgetEntry[]>([]);
+  const [breakdownRows, setBreakdownRows] = useState<CategoryRow[]>([]);
 
   useEffect(() => {
     const month = getCurrentMonth();
@@ -61,6 +69,14 @@ export function Dashboard() {
       }
 
       setOverBudget(alerts);
+
+      // Build category breakdown rows
+      const rows: CategoryRow[] = categories.map((cat) => ({
+        name: cat.name,
+        monthly_limit: cat.monthly_limit,
+        spent: spendMap.get(cat.id) ?? 0,
+      }));
+      setBreakdownRows(rows);
     }
 
     void loadAlerts();
@@ -72,6 +88,7 @@ export function Dashboard() {
       <BudgetAlerts overBudget={overBudget} />
       <SpendingChart />
       <MonthOverMonthChart />
+      <CategoryBreakdownTable rows={breakdownRows} />
     </div>
   );
 }
