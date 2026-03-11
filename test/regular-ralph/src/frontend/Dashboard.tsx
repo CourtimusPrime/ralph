@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { BudgetAlerts } from "./BudgetAlerts";
 import { SpendingChart } from "./SpendingChart";
+import { MonthOverMonthChart } from "./MonthOverMonthChart";
 
 interface Category {
   id: number;
@@ -70,6 +71,7 @@ export function Dashboard() {
       <h2 className="text-2xl font-bold text-gray-800 mb-4">Dashboard</h2>
       <BudgetAlerts overBudget={overBudget} />
       <SpendingChart />
+      <MonthOverMonthChart />
     </div>
   );
 }
