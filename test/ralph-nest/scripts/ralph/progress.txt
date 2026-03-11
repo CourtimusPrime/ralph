@@ -11,6 +11,17 @@
 Started: Wed Mar 11 16:46:29 +04 2026
 ---
 
+## 2026-03-11 - transactions-004
+- Updated `src/TransactionList.tsx` to handle DELETE API call internally with `handleDelete(id)`
+- On success: removes row from local state without re-fetch
+- On failure: shows inline `deleteError` message above table; row remains
+- Removed `onDelete` prop; delete is now fully self-contained in TransactionList
+- Files changed: `src/TransactionList.tsx`, `src/App.tsx`
+- **Learnings for future iterations:**
+  - Self-contained delete in list component (no prop needed) is cleaner than managing in App
+  - `setTransactions(prev => prev.filter(t => t.id !== id))` for optimistic row removal
+---
+
 ## 2026-03-11 - transactions-003
 - Created `src/AddTransactionForm.tsx` with Amount (number), Date (date picker, defaults today), Description, Category (select from API) fields
 - Client-side validation on submit; inline error messages per field
