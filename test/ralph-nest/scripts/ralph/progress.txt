@@ -11,6 +11,16 @@
 Started: Wed Mar 11 16:46:29 +04 2026
 ---
 
+## 2026-03-11 - dashboard-003
+- Created `src/MonthlyTotalsChart.tsx` with BarChart from Recharts
+- `buildFullMonths(6)` generates all 6 months with zero totals, then merges API data by label
+- This ensures zero-spending months appear as bars with height 0
+- X-axis labels formatted as "MMM YYYY" (e.g., "Sep 2025")
+- Files changed: `src/MonthlyTotalsChart.tsx`, `src/App.tsx`
+- **Learnings for future iterations:**
+  - Merge API data into a pre-built full month list to include zero-spending months in chart
+---
+
 ## 2026-03-11 - dashboard-002
 - Installed `recharts` package
 - Created `src/SpendingByCategoryChart.tsx` with BarChart from Recharts; prev/next arrows for month selection
