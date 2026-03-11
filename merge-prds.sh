@@ -1,21 +1,27 @@
 #!/bin/bash
 # merge-prds.sh - Merge multiple prd-*.json files in tasks/ into a single prd.json
-# Usage: ./merge-prds.sh [--dry-run]
+# Usage: ./merge-prds.sh [--dry-run] [--tasks-dir <path>] [--output <path>]
 
 set -eo pipefail
 
 DRY_RUN=false
-for arg in "$@"; do
-  case "$arg" in
-    --dry-run) DRY_RUN=true ;;
-    *) echo "Error: Unknown argument: $arg" >&2; exit 1 ;;
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+TASKS_DIR=""
+OUTPUT_FILE=""
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --dry-run) DRY_RUN=true; shift ;;
+    --tasks-dir) TASKS_DIR="$(cd "$2" && pwd)"; shift 2 ;;
+    --output) OUTPUT_FILE="$2"; shift 2 ;;
+    *) echo "Error: Unknown argument: $1" >&2; exit 1 ;;
   esac
 done
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-TASKS_DIR="$SCRIPT_DIR/tasks"
+# Defaults (relative to script location)
+TASKS_DIR="${TASKS_DIR:-$SCRIPT_DIR/tasks}"
+OUTPUT_FILE="${OUTPUT_FILE:-$SCRIPT_DIR/prd.json}"
 MASTER_FILE="$TASKS_DIR/prd-master.json"
-OUTPUT_FILE="$SCRIPT_DIR/prd.json"
 
 # Check for jq
 if ! command -v jq &>/dev/null; then
