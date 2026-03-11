@@ -2,6 +2,7 @@ import { serve } from "bun";
 import index from "./index.html";
 import "./db";
 import { categoryRoutes } from "./api/categories";
+import { transactionRoutes } from "./api/transactions";
 
 const server = serve({
   routes: {
@@ -9,6 +10,7 @@ const server = serve({
     "/*": index,
 
     ...categoryRoutes,
+    ...transactionRoutes,
   },
 
   development: process.env.NODE_ENV !== "production" && {
