@@ -1,0 +1,174 @@
+{
+  "project": "PersonalBudgetTracker",
+  "branchName": "ralph/budget-tracker",
+  "description": "Personal Budget Tracker — SQLite-backed, single-user app to manage transactions and categories, set monthly spending limits, detect over-budget categories, and visualise spending on a dashboard.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Database schema and migrations",
+      "description": "As a developer, I need the SQLite schema created on startup so the app can persist data immediately.",
+      "acceptanceCriteria": [
+        "db.ts opens (or creates) budget.db using bun:sqlite (import { Database } from 'bun:sqlite')",
+        "categories table: id INTEGER PRIMARY KEY, name TEXT NOT NULL UNIQUE, monthly_limit REAL (nullable)",
+        "transactions table: id INTEGER PRIMARY KEY, amount REAL NOT NULL, date TEXT NOT NULL (ISO-8601), description TEXT, category_id INTEGER REFERENCES categories(id)",
+        "Both tables created with CREATE TABLE IF NOT EXISTS",
+        "Running bun index.ts twice does not error or drop data",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "Category API endpoints",
+      "description": "As a developer, I need REST endpoints for categories so the frontend can manage them.",
+      "acceptanceCriteria": [
+        "GET /api/categories returns JSON array of all categories (id, name, monthly_limit)",
+        "POST /api/categories with { name, monthly_limit? } creates a category; returns 201 with the new row",
+        "PUT /api/categories/:id with { name?, monthly_limit? } updates a category; returns 200 with updated row",
+        "DELETE /api/categories/:id deletes the category; returns 204; returns 409 if transactions reference it",
+        "All handlers live in api/categories.ts and are imported in index.ts",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "Transaction API endpoints",
+      "description": "As a developer, I need REST endpoints for transactions so the frontend can list, add, and delete them.",
+      "acceptanceCriteria": [
+        "GET /api/transactions returns JSON array ordered by date DESC; each item includes id, amount, date, description, category_id, category_name",
+        "GET /api/transactions?month=YYYY-MM filters results to that month",
+        "POST /api/transactions with { amount, date, description?, category_id } creates a transaction; returns 201",
+        "DELETE /api/transactions/:id deletes a transaction; returns 204",
+        "All handlers live in api/transactions.ts and are imported in index.ts",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "title": "App shell and tab navigation",
+      "description": "As a user, I want a persistent navigation bar so I can move between Dashboard, Transactions, and Categories.",
+      "acceptanceCriteria": [
+        "index.html loads frontend/App.tsx via <script type=\"module\">",
+        "Tailwind CSS applied via CDN in index.html",
+        "App renders a top nav with three tabs: Dashboard, Transactions, Categories",
+        "Active tab is visually highlighted with Tailwind classes",
+        "Switching tabs renders the correct page component without a full page reload (client-side state)",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "Categories page — list, add, edit, delete",
+      "description": "As a user, I want to manage my spending categories so I can organise transactions and set monthly limits.",
+      "acceptanceCriteria": [
+        "Categories page lists all categories with name and monthly_limit (shows '—' if none)",
+        "Inline add form with name (required text) and monthly limit (optional number) fields; submits via POST /api/categories",
+        "Edit button opens an inline edit form pre-filled with current values; Save submits via PUT /api/categories/:id",
+        "Delete button submits via DELETE /api/categories/:id; if response is 409, shows error message 'Cannot delete: category has transactions'",
+        "Category list re-fetches and re-renders after each create, update, or delete without full page reload",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "Transactions page — list, add, delete",
+      "description": "As a user, I want to log and remove transactions so I can track my spending.",
+      "acceptanceCriteria": [
+        "Transactions page lists all transactions: date, description, amount (formatted as $X,XXX.XX), category name; ordered newest first",
+        "Inline add form: amount (required number), date (required date input defaulting to today), description (optional text), category (required dropdown populated from GET /api/categories)",
+        "Submit adds transaction via POST /api/transactions; new row appears at top of list without page reload",
+        "Delete button on each row removes transaction via DELETE /api/transactions/:id; row disappears immediately",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "Over-budget alert component",
+      "description": "As a user, I want a prominent alert when I've exceeded a category's monthly limit so I can adjust my spending.",
+      "acceptanceCriteria": [
+        "BudgetAlerts.tsx component accepts a list of { categoryName, limit, actual } objects as props",
+        "For each over-budget entry (actual > limit), renders a visible red alert: '⚠ [Category]: $X.XX spent of $Y.YY limit'",
+        "Component renders nothing (no DOM output) when the list is empty or no entries are over-budget",
+        "BudgetAlerts is rendered at the top of the Dashboard page, above the charts",
+        "Over-budget determination: sum of transaction amounts for a category where date starts with current YYYY-MM > monthly_limit",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-008",
+      "title": "Dashboard — spending by category chart",
+      "description": "As a user, I want to see how much I've spent by category this month so I can identify where my money is going.",
+      "acceptanceCriteria": [
+        "Install recharts via bun install recharts",
+        "SpendingChart.tsx renders a bar chart or pie chart of total spending per category for the current calendar month",
+        "Chart is labelled with category names and dollar amounts",
+        "Categories with zero spending for the month are excluded from the chart",
+        "Chart title reads 'Spending by Category — [Month YYYY]'",
+        "Chart data fetched from GET /api/transactions?month=YYYY-MM",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-009",
+      "title": "Dashboard — month-over-month totals chart",
+      "description": "As a user, I want to see my total monthly spending over the last 12 months so I can spot trends.",
+      "acceptanceCriteria": [
+        "MonthOverMonthChart.tsx renders a bar chart of total spending per month for the last 12 calendar months (including current month)",
+        "X-axis labelled with month abbreviations (e.g. 'Mar', 'Apr'); Y-axis shows dollar amounts",
+        "Months with no transactions display a zero bar (no gaps in the chart)",
+        "Chart title reads 'Monthly Spending — Last 12 Months'",
+        "Data fetched from GET /api/transactions (no month filter); monthly aggregation done client-side",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-010",
+      "title": "Dashboard — category breakdown table",
+      "description": "As a user, I want a table comparing each category's limit to actual spending so I can see my budget status at a glance.",
+      "acceptanceCriteria": [
+        "CategoryBreakdownTable.tsx renders a table with columns: Category | Monthly Limit | Spent This Month | Remaining",
+        "Monthly Limit column shows 'No limit' when monthly_limit is null",
+        "Remaining = limit − spent; shows '—' when there is no limit; shown in red text when negative",
+        "Rows sorted alphabetically by category name (A–Z)",
+        "Table rendered in the Dashboard page below the two charts",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}

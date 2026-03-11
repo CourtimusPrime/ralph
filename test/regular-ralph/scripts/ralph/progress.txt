@@ -1,0 +1,18 @@
+# Ralph Progress Log
+Started: Wed Mar 11 16:46:56 +04 2026
+---
+
+## Codebase Patterns
+- Use `bun:sqlite` (`import { Database } from 'bun:sqlite'`) for all SQLite access — no external packages
+- All schema migrations use `CREATE TABLE IF NOT EXISTS` for idempotency
+- DB module lives at `src/db.ts` and exports the `db` instance; import with `import "./db"` in `index.ts` to ensure it runs on startup
+
+## 2026-03-11 - US-001
+- Created `src/db.ts` with `bun:sqlite` Database; opens/creates `budget.db`; creates `categories` and `transactions` tables with `CREATE TABLE IF NOT EXISTS`
+- Added `import "./db"` to `src/index.ts` so schema runs on every server start
+- Files changed: `src/db.ts` (new), `src/index.ts`
+- **Learnings for future iterations:**
+  - `bun:sqlite` is a built-in — no install needed, just `import { Database } from 'bun:sqlite'`
+  - `AUTOINCREMENT` used on PKs to avoid ID reuse after deletes
+  - Typecheck runs via `bunx tsc --noEmit`
+---
