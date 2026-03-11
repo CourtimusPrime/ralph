@@ -71,6 +71,18 @@ Started: Wed Mar 11 16:46:56 +04 2026
   - Browser verified: add, edit form, 409 delete error all work correctly
 ---
 
+## 2026-03-11 - US-007
+- Created `src/frontend/BudgetAlerts.tsx` component accepting `{ categoryName, limit, actual }[]` props; renders red alert per over-budget entry; returns null when none
+- Updated `src/frontend/Dashboard.tsx` to fetch `/api/categories` and `/api/transactions?month=YYYY-MM`, sum spending per category, compute over-budget entries, and render `<BudgetAlerts>` at top above charts
+- Browser verified: new Dashboard code is live; alerts hidden correctly when no over-budget categories
+- Files changed: `src/frontend/BudgetAlerts.tsx` (new), `src/frontend/Dashboard.tsx`
+- **Learnings for future iterations:**
+  - `Promise.all([fetch(...), fetch(...)])` to load categories and transactions in parallel on mount
+  - BudgetAlerts returns `null` (not an empty fragment) when no over-budget items — satisfies "no DOM output" requirement
+  - Dashboard.tsx is the parent that owns data fetching; BudgetAlerts is a pure display component
+
+---
+
 ## 2026-03-11 - US-006
 - Rewrote `src/frontend/Transactions.tsx` with full list/add/delete UI
 - Add form: amount (required), date (defaults to today via `new Date().toISOString().slice(0, 10)`), description (optional), category dropdown (populated from GET /api/categories)
@@ -82,4 +94,38 @@ Started: Wed Mar 11 16:46:56 +04 2026
   - Date input defaults to today with `new Date().toISOString().slice(0, 10)`
   - Category dropdown must be populated from a separate GET /api/categories fetch — both fetches happen in parallel via dual `useEffect` calls
   - Browser verified: add, list, delete all work correctly
+---
+
+## 2026-03-11 - US-008
+- Installed recharts (`bun install recharts`)
+- Created `src/frontend/SpendingChart.tsx`: bar chart of spending per category for current month using recharts `BarChart`; data fetched from `GET /api/transactions?month=YYYY-MM`; categories with zero spending excluded; chart title includes formatted month/year
+- Updated `src/frontend/Dashboard.tsx` to import and render `<SpendingChart />` below `<BudgetAlerts>`
+- Files changed: `src/frontend/SpendingChart.tsx` (new), `src/frontend/Dashboard.tsx`, `package.json`, `bun.lock`
+- **Learnings for future iterations:**
+  - recharts `Tooltip` `formatter` prop receives `ValueType | undefined` — must guard with `typeof value !== "number"` to satisfy TypeScript strict checks
+  - Use `ResponsiveContainer width="100%" height={300}` to make recharts charts fill available width
+  - `Cell` component inside `Bar` used to apply per-bar colors from a color palette array with `COLORS[index % COLORS.length]`
+  - Manual browser verification needed (no browser tools available in this session)
+---
+
+## 2026-03-11 - US-009
+- Created `src/frontend/MonthOverMonthChart.tsx`: bar chart of total spending per month for last 12 calendar months; months pre-generated client-side with zero amounts so no gaps appear; data fetched from `GET /api/transactions` (no filter); monthly aggregation done client-side via `tx.date.slice(0, 7)`
+- Updated `src/frontend/Dashboard.tsx` to import and render `<MonthOverMonthChart />` below `<SpendingChart />`
+- Files changed: `src/frontend/MonthOverMonthChart.tsx` (new), `src/frontend/Dashboard.tsx`
+- **Learnings for future iterations:**
+  - Generate last 12 months array upfront with `amount: 0` so all months have a bar even when no transactions exist
+  - Use `new Date(year, month - i, 1)` iteration to generate prior months correctly (handles year boundary)
+  - `tx.date.slice(0, 7)` extracts `YYYY-MM` from ISO-8601 date string for aggregation key
+  - `labelFormatter` on Tooltip accepts `(label) => String(label)` to avoid raw node rendering
+  - Manual browser verification needed (no browser tools available in this session)
+---
+
+## 2026-03-11 - US-010
+- Created `src/frontend/CategoryBreakdownTable.tsx`: table with Category | Monthly Limit | Spent This Month | Remaining columns; rows sorted A–Z; 'No limit' when monthly_limit is null; '—' for Remaining when no limit; red text when Remaining is negative
+- Updated `src/frontend/Dashboard.tsx` to build `CategoryRow[]` from already-fetched categories + transactions and pass to `<CategoryBreakdownTable rows={breakdownRows} />`; rendered below `<MonthOverMonthChart />`
+- Files changed: `src/frontend/CategoryBreakdownTable.tsx` (new), `src/frontend/Dashboard.tsx`
+- **Learnings for future iterations:**
+  - Reuse already-fetched data in Dashboard rather than having the child component fetch independently — avoids duplicate requests
+  - `[...rows].sort((a, b) => a.name.localeCompare(b.name))` is the clean pattern for alphabetical sort without mutating state
+  - Manual browser verification needed (no browser tools available in this session)
 ---
