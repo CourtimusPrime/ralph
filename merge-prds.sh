@@ -58,6 +58,17 @@ done
 
 STORY_COUNT=$(jq 'length' <<< "$ALL_STORIES")
 
+# Preserve passes status from existing prd.json
+OLD_PASSED_IDS="{}"
+if [ -f "$OUTPUT_FILE" ]; then
+  OLD_PASSED_IDS=$(jq '[.userStories // [] | .[] | select(.passes == true) | .id] | map({(.): true}) | add // {}' "$OUTPUT_FILE")
+fi
+
+ALL_STORIES=$(jq -n \
+  --argjson stories "$ALL_STORIES" \
+  --argjson passed "$OLD_PASSED_IDS" \
+  '$stories | map(. + {passes: ($passed[.id] // false)})')
+
 # Build and write the final prd.json
 jq -n \
   --arg project "$PROJECT" \
