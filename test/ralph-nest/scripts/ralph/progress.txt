@@ -11,6 +11,16 @@
 Started: Wed Mar 11 16:46:29 +04 2026
 ---
 
+## 2026-03-11 - dashboard-002
+- Installed `recharts` package
+- Created `src/SpendingByCategoryChart.tsx` with BarChart from Recharts; prev/next arrows for month selection
+- Shows "No spending this month" when all totals are zero
+- Files changed: `src/SpendingByCategoryChart.tsx`, `src/App.tsx`, `package.json`, `bun.lock`
+- **Learnings for future iterations:**
+  - Recharts `Tooltip formatter` needs `(v) => typeof v === "number" ? ... : v` to avoid TS type errors
+  - Use `recharts` for charting — works well with Bun/React
+---
+
 ## 2026-03-11 - dashboard-001
 - Added `GET /api/dashboard/spending-by-category` and `GET /api/dashboard/monthly-totals` routes to `src/index.ts`
 - Both routes parse query params; default to current year/month for spending-by-category, default N=6 for monthly-totals
