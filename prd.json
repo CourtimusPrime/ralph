@@ -1,0 +1,113 @@
+{
+  "project": "Ralph",
+  "branchName": "feature/compilation-step",
+  "description": "Compilation Step — multiple scoped prd-*.json files in tasks/ merge into a single flat prd.json before Ralph runs",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Create tasks/ directory structure and example files",
+      "description": "As a developer, I want a defined layout for tasks/ so I know exactly what files to create.",
+      "acceptanceCriteria": [
+        "tasks/prd-master.json exists as a template with fields: project, branchName, description",
+        "tasks/prd-example-scope.json exists as a minimal example sub-PRD with namespaced IDs, priority, passes, and notes fields",
+        "tasks/README.md exists (stub is fine; full content covered in US-006)",
+        "Both JSON files are valid JSON",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "Implement core merge logic in merge-prds.sh",
+      "description": "As a developer, I want to run merge-prds.sh and have it produce a valid prd.json from all prd-*.json files in tasks/.",
+      "acceptanceCriteria": [
+        "merge-prds.sh is executable and located in the repo root alongside ralph.sh",
+        "Script checks that jq is installed and exits 1 with a clear error if not",
+        "Reads tasks/prd-master.json for project, branchName, and description",
+        "Discovers all tasks/prd-*.json files excluding prd-master.json",
+        "Merges userStories arrays from all sub-PRDs in case-insensitive alphabetical filename order",
+        "Story IDs are namespaced using the filename stem: prd-query-optimization.json produces IDs prefixed query-optimization- (e.g. query-optimization-001)",
+        "Global priority values are reassigned 1, 2, 3... in merge order (original values ignored)",
+        "Output written to prd.json in the repo root",
+        "Script exits 0 on success, non-zero on any error",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "Preserve passes status on re-merge",
+      "description": "As a developer, I want re-running merge-prds.sh after Ralph has completed some stories to not reset completed work.",
+      "acceptanceCriteria": [
+        "Before writing prd.json, script reads existing prd.json if it exists",
+        "For each story in the merged output, if a story with the same namespaced ID exists in the old prd.json with passes: true, the merged story inherits passes: true",
+        "New stories (not in old prd.json) default to passes: false",
+        "Stories removed from sub-PRDs are dropped from the output and not carried over",
+        "Existing prd.json with no matching stories is treated as empty with no error",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "title": "Add validation with clear error messages",
+      "description": "As a developer, I want the script to catch common mistakes before writing prd.json so I don't hand Ralph a broken task list.",
+      "acceptanceCriteria": [
+        "Error if tasks/prd-master.json is missing or not valid JSON",
+        "Error if any tasks/prd-*.json file is not valid JSON",
+        "Error if any sub-PRD is missing the userStories array",
+        "Warning printed to stderr (not an error, exit 0) if a sub-PRD has zero user stories",
+        "Error if duplicate story IDs are detected after namespacing",
+        "All errors print the offending filename and a human-readable message to stderr",
+        "Script exits non-zero on any error, zero if only warnings",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "Add --dry-run flag",
+      "description": "As a developer, I want to preview what the merge would produce without writing prd.json, so I can safely inspect the output before committing.",
+      "acceptanceCriteria": [
+        "merge-prds.sh --dry-run runs all validation and merge logic",
+        "Merged prd.json content is printed to stdout instead of writing the file",
+        "Summary line printed to stderr: [dry-run] Would merge N stories from M files",
+        "prd.json and all other files are not modified when --dry-run is passed",
+        "Exit code follows the same rules as a normal run (non-zero on validation error)",
+        "Typecheck passes"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "Write tasks/README.md workflow documentation",
+      "description": "As a developer, I want clear documentation in tasks/README.md so I can onboard to the multi-PRD workflow without reading the script.",
+      "acceptanceCriteria": [
+        "Explains the purpose of the compilation step in 2-3 sentences",
+        "Describes the required files: prd-master.json and prd-*.json sub-PRDs",
+        "Shows the prd-master.json schema with a concrete example",
+        "Shows the prd-*.json sub-PRD schema with a minimal example",
+        "Explains ID namespacing with a concrete example (filename to prefix to final IDs)",
+        "Documents the passes preservation behavior on re-merge",
+        "Shows standard usage: ./merge-prds.sh && ./ralph.sh",
+        "Documents the --dry-run flag with example output",
+        "Notes that prd-master.json is excluded from the merge sweep",
+        "Notes that filename prefixes (e.g. prd-01-queries.json) control merge order",
+        "Typecheck passes"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}

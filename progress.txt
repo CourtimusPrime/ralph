@@ -1,0 +1,67 @@
+# Ralph Progress Log
+Started: Wed Mar 11 09:29:10 +04 2026
+---
+
+## 2026-03-11 - US-001
+- Created tasks/prd-master.json as a template with project, branchName, description fields
+- Created tasks/prd-example-scope.json as a minimal sub-PRD example with namespaced IDs, priority, passes, and notes fields
+- Created tasks/README.md as a stub (full content deferred to US-006)
+- Files changed: tasks/prd-master.json, tasks/prd-example-scope.json, tasks/README.md
+- **Learnings for future iterations:**
+  - tasks/ directory already existed with prd-compilation-step.md before this story
+  - Example sub-PRD uses filename stem as namespace prefix in story IDs (e.g. example-scope-001)
+  - Both JSON files validated with `jq .`
+---
+
+## 2026-03-11 - US-002
+- Created merge-prds.sh (executable, in repo root alongside ralph.sh)
+- Script checks for jq and exits 1 with clear error if missing
+- Reads project/branchName/description from tasks/prd-master.json
+- Discovers tasks/prd-*.json files excluding prd-master.json via find + sort -f (case-insensitive)
+- IDs namespaced as {stem}-{NNN} where stem = filename minus prd- prefix and .json suffix
+- Global priorities reassigned 1, 2, 3... across all stories in merge order
+- Output written to prd.json; exits 0 on success
+- Files changed: merge-prds.sh
+- **Learnings for future iterations:**
+  - prd.json is in .gitignore (generated file); restore it manually if the merge script overwrites it during testing
+  - jq zero-padding trick: `("000" + $seq)[-3:]` produces 001..999 from a tostring number
+  - Use `${ARRAY[@]+"${ARRAY[@]}"}` pattern to safely iterate potentially-empty bash arrays with set -u
+  - Sub-PRD IDs in the source files are replaced entirely; original IDs do not carry over
+---
+
+## 2026-03-11 - US-003
+- Added passes preservation logic to merge-prds.sh
+- Before writing prd.json, reads existing prd.json and builds a lookup set of IDs with passes: true
+- After merging all stories, overrides each story's passes field: true if ID was in old prd.json with passes: true, false otherwise
+- Files changed: merge-prds.sh
+- **Learnings for future iterations:**
+  - `passes` in sub-PRD source files is always overridden by this step; prd.json is the source of truth for pass/fail status
+  - jq pattern to build ID→boolean lookup: `[.userStories // [] | .[] | select(.passes == true) | .id] | map({(.): true}) | add // {}`
+  - `$passed[.id] // false` safely returns false when the ID key doesn't exist in the lookup object
+---
+
+## 2026-03-11 - US-004
+- Added validation to merge-prds.sh before the merge loop:
+  1. Validates prd-master.json is valid JSON (after existence check)
+  2. For each sub-PRD: validates JSON, checks userStories array exists, warns (stderr, exit 0) if zero stories
+  3. After merging: checks for duplicate namespaced IDs using jq group_by
+- All errors print offending filename + human-readable message to stderr; exit non-zero
+- Warnings print to stderr but exit 0
+- Files changed: merge-prds.sh
+- **Learnings for future iterations:**
+  - `jq -e '.userStories | arrays'` exits non-zero if field is absent or not an array — good for array presence checks
+  - Duplicate ID check: `jq -r '[.[].id] | group_by(.) | map(select(length > 1)) | .[0][0] // empty'` returns the first duplicate or empty string
+  - Running merge-prds.sh during testing will overwrite prd.json with example output; always restore prd.json manually afterward (it's in .gitignore)
+---
+
+## 2026-03-11 - US-005
+- Added --dry-run flag to merge-prds.sh
+- Argument parsing loop at top of script; unknown flags exit 1 with error
+- In dry-run mode: FINAL_JSON printed to stdout, summary line to stderr, prd.json untouched
+- In normal mode: FINAL_JSON written to prd.json as before
+- Files changed: merge-prds.sh
+- **Learnings for future iterations:**
+  - Store final JSON in a variable before the write/print branch so both paths share the same jq call
+  - `echo "$FINAL_JSON" > "$OUTPUT_FILE"` is equivalent to the previous redirect from jq directly
+  - Summary format for dry-run stderr: `[dry-run] Would merge N stories from M files`
+---
