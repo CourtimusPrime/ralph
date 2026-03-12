@@ -8,9 +8,15 @@ user-invocable: true
 
 Create detailed Product Requirements Documents that are clear, actionable, and suitable for implementation.
 
+**Two modes:**
+- `/prd "feature description"` — single PRD file (normal mode)
+- `/prd --bus "feature description"` — split into multiple scoped sub-PRD files (bus mode, for large features)
+
 ---
 
-## The Job
+## Normal Mode
+
+### The Job
 
 1. Receive a feature description from the user
 2. Ask 3-5 essential clarifying questions (with lettered options)
@@ -21,7 +27,7 @@ Create detailed Product Requirements Documents that are clear, actionable, and s
 
 ---
 
-## Step 1: Clarifying Questions
+### Step 1: Clarifying Questions
 
 Ask only critical questions where the initial prompt is ambiguous. Focus on:
 
@@ -56,17 +62,17 @@ This lets users respond with "1A, 2C, 3B" for quick iteration. Remember to inden
 
 ---
 
-## Step 2: PRD Structure
+### Step 2: PRD Structure
 
 Generate the PRD with these sections:
 
-### 1. Introduction/Overview
+#### 1. Introduction/Overview
 Brief description of the feature and the problem it solves.
 
-### 2. Goals
+#### 2. Goals
 Specific, measurable objectives (bullet list).
 
-### 3. User Stories
+#### 3. User Stories
 Each story needs:
 - **Title:** Short descriptive name
 - **Description:** "As a [user], I want [feature] so that [benefit]"
@@ -86,152 +92,36 @@ Each story should be small enough to implement in one focused session.
 - [ ] **[UI stories only]** Verify in browser using dev-browser skill
 ```
 
-**Important:** 
+**Important:**
 - Acceptance criteria must be verifiable, not vague. "Works correctly" is bad. "Button shows confirmation dialog before deleting" is good.
-- **For any story with UI changes:** Always include "Verify in browser using dev-browser skill" as acceptance criteria. This ensures visual verification of frontend work.
+- **For any story with UI changes:** Always include "Verify in browser using dev-browser skill" as acceptance criteria.
 
-### 4. Functional Requirements
-Numbered list of specific functionalities:
-- "FR-1: The system must allow users to..."
-- "FR-2: When a user clicks X, the system must..."
+#### 4. Functional Requirements
+Numbered list of specific functionalities.
 
-Be explicit and unambiguous.
+#### 5. Non-Goals (Out of Scope)
+What this feature will NOT include.
 
-### 5. Non-Goals (Out of Scope)
-What this feature will NOT include. Critical for managing scope.
+#### 6. Technical Considerations (Optional)
+Known constraints, dependencies, integration points.
 
-### 6. Design Considerations (Optional)
-- UI/UX requirements
-- Link to mockups if available
-- Relevant existing components to reuse
-
-### 7. Technical Considerations (Optional)
-- Known constraints or dependencies
-- Integration points with existing systems
-- Performance requirements
-
-### 8. Success Metrics
+#### 7. Success Metrics
 How will success be measured?
-- "Reduce time to complete X by 50%"
-- "Increase conversion rate by 10%"
 
-### 9. Open Questions
+#### 8. Open Questions
 Remaining questions or areas needing clarification.
 
 ---
 
-## Writing for Junior Developers
-
-The PRD reader may be a junior developer or AI agent. Therefore:
-
-- Be explicit and unambiguous
-- Avoid jargon or explain it
-- Provide enough detail to understand purpose and core logic
-- Number requirements for easy reference
-- Use concrete examples where helpful
-
----
-
-## Output
+### Output
 
 - **Format:** Markdown (`.md`)
 - **Location:** `tasks/`
-- **Filename:** `prd-[feature-name].md` (kebab-case)
+- **Filename:** `tasks/prd-[feature-name].md` (kebab-case)
 
 ---
 
-## Example PRD
-
-```markdown
-# PRD: Task Priority System
-
-## Introduction
-
-Add priority levels to tasks so users can focus on what matters most. Tasks can be marked as high, medium, or low priority, with visual indicators and filtering to help users manage their workload effectively.
-
-## Goals
-
-- Allow assigning priority (high/medium/low) to any task
-- Provide clear visual differentiation between priority levels
-- Enable filtering and sorting by priority
-- Default new tasks to medium priority
-
-## User Stories
-
-### US-001: Add priority field to database
-**Description:** As a developer, I need to store task priority so it persists across sessions.
-
-**Acceptance Criteria:**
-- [ ] Add priority column to tasks table: 'high' | 'medium' | 'low' (default 'medium')
-- [ ] Generate and run migration successfully
-- [ ] Typecheck passes
-
-### US-002: Display priority indicator on task cards
-**Description:** As a user, I want to see task priority at a glance so I know what needs attention first.
-
-**Acceptance Criteria:**
-- [ ] Each task card shows colored priority badge (red=high, yellow=medium, gray=low)
-- [ ] Priority visible without hovering or clicking
-- [ ] Typecheck passes
-- [ ] Verify in browser using dev-browser skill
-
-### US-003: Add priority selector to task edit
-**Description:** As a user, I want to change a task's priority when editing it.
-
-**Acceptance Criteria:**
-- [ ] Priority dropdown in task edit modal
-- [ ] Shows current priority as selected
-- [ ] Saves immediately on selection change
-- [ ] Typecheck passes
-- [ ] Verify in browser using dev-browser skill
-
-### US-004: Filter tasks by priority
-**Description:** As a user, I want to filter the task list to see only high-priority items when I'm focused.
-
-**Acceptance Criteria:**
-- [ ] Filter dropdown with options: All | High | Medium | Low
-- [ ] Filter persists in URL params
-- [ ] Empty state message when no tasks match filter
-- [ ] Typecheck passes
-- [ ] Verify in browser using dev-browser skill
-
-## Functional Requirements
-
-- FR-1: Add `priority` field to tasks table ('high' | 'medium' | 'low', default 'medium')
-- FR-2: Display colored priority badge on each task card
-- FR-3: Include priority selector in task edit modal
-- FR-4: Add priority filter dropdown to task list header
-- FR-5: Sort by priority within each status column (high to medium to low)
-
-## Non-Goals
-
-- No priority-based notifications or reminders
-- No automatic priority assignment based on due date
-- No priority inheritance for subtasks
-
-## Technical Considerations
-
-- Reuse existing badge component with color variants
-- Filter state managed via URL search params
-- Priority stored in database, not computed
-
-## Success Metrics
-
-- Users can change priority in under 2 clicks
-- High-priority tasks immediately visible at top of lists
-- No regression in task list performance
-
-## Open Questions
-
-- Should priority affect task ordering within a column?
-- Should we add keyboard shortcuts for priority changes?
-```
-
----
-
-## Checklist
-
-Before saving the PRD:
+### Checklist
 
 - [ ] Asked clarifying questions with lettered options
 - [ ] Incorporated user's answers
@@ -239,3 +129,126 @@ Before saving the PRD:
 - [ ] Functional requirements are numbered and unambiguous
 - [ ] Non-goals section defines clear boundaries
 - [ ] Saved to `tasks/prd-[feature-name].md`
+
+---
+
+## Bus Mode (`--bus`)
+
+Use for large features where a single PRD would have too many stories (7+). Splits the feature into multiple focused sub-PRD files by domain, each covering one area.
+
+### The Job
+
+1. Parse the feature description and optional file count (`/prd --bus "description" N`)
+2. Derive a `[feature-slug]` (kebab-case, e.g. `budget-tracker`)
+3. Ask 3–5 clarifying questions (same style as normal mode)
+4. Decide how to partition the feature into sub-domains
+5. Present the proposed partition before writing (filename + one-line scope per file)
+6. On confirmation (or if user says "go"), write all files
+
+Without `N`: decide the number of files based on natural domain boundaries.
+With `N`: produce exactly `N` files (must be 2–8).
+
+### Propose the Partition First
+
+Before writing, show the user what you plan:
+
+```
+I'll split this into 3 sub-PRD files in tasks/budget-tracker/:
+
+  prd-01-data-layer.md     — Schema, storage, and data access
+  prd-02-core-ui.md        — Main views and user interactions
+  prd-03-reporting.md      — Charts, summaries, and export
+
+Does this look right? (Reply to adjust, or say "go" to proceed)
+```
+
+### File Naming
+
+```
+tasks/[feature-slug]/prd-01-[scope].md
+tasks/[feature-slug]/prd-02-[scope].md
+tasks/[feature-slug]/prd-03-[scope].md
+```
+
+General ordering: **data before logic before UI before reporting.**
+
+### Sub-PRD Structure
+
+Each sub-PRD uses the same format as a normal PRD, scoped to its domain:
+
+```markdown
+# Sub-PRD: [Scope Title]
+## Part of: [Feature Name]
+
+## Introduction
+[What this file covers and why it's its own domain]
+
+## User Stories
+
+### US-001: [Title]
+**Description:** As a [user], I want [feature] so that [benefit].
+
+**Acceptance Criteria:**
+- [ ] Specific verifiable criterion
+- [ ] Typecheck/lint passes
+- [ ] **[UI stories only]** Verify in browser using dev-browser skill
+
+## Functional Requirements
+- FR-1: ...
+
+## Non-Goals
+- [What is NOT in this file — name sibling files explicitly]
+
+## Dependencies
+- Depends on: [prd-01-foo.md completing X] (if applicable)
+```
+
+Key rules:
+- Keep each file to **3–6 user stories**
+- Non-Goals must name sibling files
+- Stories ordered: schema → backend → UI within each file
+- Every story must have "Typecheck/lint passes"
+- UI stories must have "Verify in browser using dev-browser skill"
+
+### Partition Heuristics
+
+| Feature size | Suggested files |
+|---|---|
+| 4–6 stories total | 2 files |
+| 7–12 stories total | 3 files |
+| 13–18 stories total | 4–5 files |
+| 18+ stories | Consider scoping down first |
+
+Natural split boundaries:
+- **Data layer** (schema, persistence) — almost always its own file
+- **Core interactions** (CRUD, primary actions) — its own file
+- **Reporting/analytics** (charts, export) — always its own file
+- **Auth/permissions** — always its own file if present
+
+### Output Summary
+
+After writing all files, print:
+
+```
+Created 3 sub-PRD files in tasks/budget-tracker/:
+
+  prd-01-data-layer.md         3 stories — schema and persistence
+  prd-02-core-ui.md            4 stories — add/edit/delete transactions
+  prd-03-reporting.md          3 stories — charts and export
+
+Next steps:
+  1. Review and edit the files in tasks/budget-tracker/
+  2. Run: /ralph --bus tasks/budget-tracker   (compiles into scripts/ralph/prd.json)
+  3. Run: ./scripts/ralph/ralph.sh
+```
+
+### Bus Mode Checklist
+
+- [ ] Clarifying questions asked with lettered options
+- [ ] Partition proposed and confirmed before writing
+- [ ] Files written to `tasks/[feature-slug]/` (not `tasks/[feature-slug]/prd/`)
+- [ ] Each sub-PRD has a "Non-Goals" section referencing sibling files
+- [ ] Stories ordered data → logic → UI within each file
+- [ ] Every story has "Typecheck/lint passes"
+- [ ] UI stories have "Verify in browser using dev-browser skill"
+- [ ] Summary table printed after writing

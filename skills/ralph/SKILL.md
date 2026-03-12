@@ -8,15 +8,17 @@ user-invocable: true
 
 Converts existing PRDs to the prd.json format that Ralph uses for autonomous execution.
 
----
-
-## The Job
-
-Take a PRD (markdown file or text) and convert it to `prd.json` in your ralph directory.
+**Two modes:**
+- `/ralph tasks/prd-[feature].md` — convert a single PRD file (normal mode)
+- `/ralph --bus tasks/[feature-slug]/` — compile a folder of sub-PRD files into bus format
 
 ---
 
-## Output Format
+## Normal Mode
+
+Takes a PRD (markdown file or text) and converts it to `scripts/ralph/prd.json`.
+
+### Output Format
 
 ```json
 {
@@ -41,186 +43,157 @@ Take a PRD (markdown file or text) and convert it to `prd.json` in your ralph di
 }
 ```
 
----
-
-## Story Size: The Number One Rule
+### Story Size: The Number One Rule
 
 **Each story must be completable in ONE Ralph iteration (one context window).**
 
-Ralph spawns a fresh Amp instance per iteration with no memory of previous work. If a story is too big, the LLM runs out of context before finishing and produces broken code.
-
-### Right-sized stories:
+Right-sized stories:
 - Add a database column and migration
 - Add a UI component to an existing page
 - Update a server action with new logic
 - Add a filter dropdown to a list
 
-### Too big (split these):
-- "Build the entire dashboard" - Split into: schema, queries, UI components, filters
-- "Add authentication" - Split into: schema, middleware, login UI, session handling
-- "Refactor the API" - Split into one story per endpoint or pattern
+Too big (split these):
+- "Build the entire dashboard" → schema, queries, UI components, filters
+- "Add authentication" → schema, middleware, login UI, session handling
+- "Refactor the API" → one story per endpoint or pattern
 
 **Rule of thumb:** If you cannot describe the change in 2-3 sentences, it is too big.
 
----
-
-## Story Ordering: Dependencies First
+### Story Ordering: Dependencies First
 
 Stories execute in priority order. Earlier stories must not depend on later ones.
 
-**Correct order:**
 1. Schema/database changes (migrations)
 2. Server actions / backend logic
 3. UI components that use the backend
 4. Dashboard/summary views that aggregate data
 
-**Wrong order:**
-1. UI component (depends on schema that does not exist yet)
-2. Schema change
+### Acceptance Criteria: Must Be Verifiable
 
----
-
-## Acceptance Criteria: Must Be Verifiable
-
-Each criterion must be something Ralph can CHECK, not something vague.
-
-### Good criteria (verifiable):
+Good (verifiable):
 - "Add `status` column to tasks table with default 'pending'"
 - "Filter dropdown has options: All, Active, Completed"
-- "Clicking delete shows confirmation dialog"
 - "Typecheck passes"
-- "Tests pass"
 
-### Bad criteria (vague):
+Bad (vague):
 - "Works correctly"
-- "User can do X easily"
 - "Good UX"
-- "Handles edge cases"
 
-### Always include as final criterion:
-```
-"Typecheck passes"
-```
+Always include as final criterion: `"Typecheck passes"`
 
-For stories with testable logic, also include:
-```
-"Tests pass"
-```
+For stories with testable logic: `"Tests pass"`
 
-### For stories that change UI, also include:
-```
-"Verify in browser using dev-browser skill"
-```
+For UI stories: `"Verify in browser using dev-browser skill"`
 
-Frontend stories are NOT complete until visually verified. Ralph will use the dev-browser skill to navigate to the page, interact with the UI, and confirm changes work.
+### Conversion Rules
 
----
+1. Each user story becomes one JSON entry
+2. IDs: Sequential (US-001, US-002, etc.)
+3. Priority: Based on dependency order, then document order
+4. All stories: `passes: false` and empty `notes`
+5. `branchName`: Derive from feature name, kebab-case, prefixed with `ralph/`
+6. Always add "Typecheck passes" to every story's acceptance criteria
 
-## Conversion Rules
+### Archiving Previous Runs
 
-1. **Each user story becomes one JSON entry**
-2. **IDs**: Sequential (US-001, US-002, etc.)
-3. **Priority**: Based on dependency order, then document order
-4. **All stories**: `passes: false` and empty `notes`
-5. **branchName**: Derive from feature name, kebab-case, prefixed with `ralph/`
-6. **Always add**: "Typecheck passes" to every story's acceptance criteria
+Before writing a new `prd.json`, check if one exists from a different feature:
 
----
+1. Read the current `prd.json` if it exists
+2. If `branchName` differs from the new feature's branch name:
+   - Create `scripts/ralph/archive/YYYY-MM-DD-[old-branch]/`
+   - Copy `prd.json` and `progress.txt` to the archive
+   - If old `prd.json` was bus mode, also copy `scripts/ralph/busses/[old-slug]/`
+   - Reset `progress.txt` with fresh header
 
-## Splitting Large PRDs
+### Normal Mode Checklist
 
-If a PRD has big features, split them:
-
-**Original:**
-> "Add user notification system"
-
-**Split into:**
-1. US-001: Add notifications table to database
-2. US-002: Create notification service for sending notifications
-3. US-003: Add notification bell icon to header
-4. US-004: Create notification dropdown panel
-5. US-005: Add mark-as-read functionality
-6. US-006: Add notification preferences page
-
-Each is one focused change that can be completed and verified independently.
+- [ ] Previous run archived (if `prd.json` exists with different `branchName`)
+- [ ] Each story completable in one iteration
+- [ ] Stories ordered by dependency (schema → backend → UI)
+- [ ] Every story has "Typecheck passes"
+- [ ] UI stories have "Verify in browser using dev-browser skill"
+- [ ] Acceptance criteria are verifiable (not vague)
+- [ ] No story depends on a later story
 
 ---
 
-## Example
+## Bus Mode (`--bus`)
 
-**Input PRD:**
-```markdown
-# Task Status Feature
+Compiles a folder of sub-PRD markdown files (produced by `/prd --bus`) into Ralph's bus format:
+- One `scripts/ralph/busses/[slug]/prd-NN-[scope].json` per source file
+- `scripts/ralph/prd.json` as a manifest pointing to the sub-files
 
-Add ability to mark tasks with different statuses.
+**Usage:** `/ralph --bus tasks/budget-tracker`
 
-## Requirements
-- Toggle between pending/in-progress/done on task list
-- Filter list by status
-- Show status badge on each task
-- Persist status in database
-```
+### Output Files
 
-**Output prd.json:**
+Given argument `tasks/budget-tracker` (slug = `budget-tracker`):
+
+| Source file | Write to |
+|---|---|
+| `tasks/budget-tracker/prd-01-data-layer.md` | `scripts/ralph/busses/budget-tracker/prd-01-data-layer.json` |
+| `tasks/budget-tracker/prd-02-transactions-ui.md` | `scripts/ralph/busses/budget-tracker/prd-02-transactions-ui.json` |
+| `tasks/budget-tracker/prd-03-dashboard.md` | `scripts/ralph/busses/budget-tracker/prd-03-dashboard.json` |
+
+Pattern: `scripts/ralph/busses/[slug]/[source-filename-stem].json`
+
+The slug is the folder's basename. Do NOT prepend the slug to the filename.
+
+Also write: `scripts/ralph/prd.json` (manifest only — no `userStories` key)
+
+### Steps
+
+1. Read all `prd-NN-*.md` files in the folder, sorted alphabetically (= numeric order)
+2. Extract user stories from each file
+3. Namespace story IDs using the filename stem:
+   - `prd-01-data-layer.md` → IDs `data-layer-001`, `data-layer-002`, ...
+   - `prd-02-transactions-ui.md` → IDs `transactions-ui-001`, `transactions-ui-002`, ...
+4. Assign globally unique `priority` values `1, 2, 3, ...` across all stories in file order
+5. Infer top-level fields:
+   - `project`: from `package.json` `name` field if present, otherwise infer from codebase name
+   - `branchName`: `feature/[slug]` (e.g., `tasks/budget-tracker` → `feature/budget-tracker`)
+   - `description`: compose from folder name and sub-PRD titles/introductions
+6. Preserve `passes` status: match existing sub-file stories by ID — `passes: true` stories keep their status; new stories default to `false`
+7. Create `scripts/ralph/busses/[slug]/` if it does not exist
+8. Write each source file's stories to its sub-file
+9. Write `scripts/ralph/prd.json` as manifest
+
+### Output Formats
+
+#### `scripts/ralph/prd.json` — manifest, no `userStories`
+
 ```json
 {
-  "project": "TaskApp",
-  "branchName": "ralph/task-status",
-  "description": "Task Status Feature - Track task progress with status indicators",
+  "project": "PersonalBudgetTracker",
+  "branchName": "feature/budget-tracker",
+  "description": "...",
+  "busses": [
+    "busses/budget-tracker/prd-01-data-layer.json",
+    "busses/budget-tracker/prd-02-transactions-ui.json",
+    "busses/budget-tracker/prd-03-dashboard.json"
+  ]
+}
+```
+
+Paths in `busses` are relative to `scripts/ralph/`. Always start with `busses/`.
+
+#### `scripts/ralph/busses/[slug]/prd-NN-[scope].json` — sub-file
+
+```json
+{
+  "scope": "Data Layer",
+  "source": "tasks/budget-tracker/prd-01-data-layer.md",
   "userStories": [
     {
-      "id": "US-001",
-      "title": "Add status field to tasks table",
-      "description": "As a developer, I need to store task status in the database.",
+      "id": "data-layer-001",
+      "title": "...",
+      "description": "As a [user], I want [feature] so that [benefit]",
       "acceptanceCriteria": [
-        "Add status column: 'pending' | 'in_progress' | 'done' (default 'pending')",
-        "Generate and run migration successfully",
+        "Criterion 1",
         "Typecheck passes"
       ],
       "priority": 1,
-      "passes": false,
-      "notes": ""
-    },
-    {
-      "id": "US-002",
-      "title": "Display status badge on task cards",
-      "description": "As a user, I want to see task status at a glance.",
-      "acceptanceCriteria": [
-        "Each task card shows colored status badge",
-        "Badge colors: gray=pending, blue=in_progress, green=done",
-        "Typecheck passes",
-        "Verify in browser using dev-browser skill"
-      ],
-      "priority": 2,
-      "passes": false,
-      "notes": ""
-    },
-    {
-      "id": "US-003",
-      "title": "Add status toggle to task list rows",
-      "description": "As a user, I want to change task status directly from the list.",
-      "acceptanceCriteria": [
-        "Each row has status dropdown or toggle",
-        "Changing status saves immediately",
-        "UI updates without page refresh",
-        "Typecheck passes",
-        "Verify in browser using dev-browser skill"
-      ],
-      "priority": 3,
-      "passes": false,
-      "notes": ""
-    },
-    {
-      "id": "US-004",
-      "title": "Filter tasks by status",
-      "description": "As a user, I want to filter the list to see only certain statuses.",
-      "acceptanceCriteria": [
-        "Filter dropdown: All | Pending | In Progress | Done",
-        "Filter persists in URL params",
-        "Typecheck passes",
-        "Verify in browser using dev-browser skill"
-      ],
-      "priority": 4,
       "passes": false,
       "notes": ""
     }
@@ -228,31 +201,27 @@ Add ability to mark tasks with different statuses.
 }
 ```
 
----
+`passes` lives in sub-files only — never written to `prd.json`.
 
-## Archiving Previous Runs
+### Archiving Previous Runs
 
-**Before writing a new prd.json, check if there is an existing one from a different feature:**
+Before writing, check if `scripts/ralph/prd.json` exists with a different `branchName`:
 
-1. Read the current `prd.json` if it exists
-2. Check if `branchName` differs from the new feature's branch name
-3. If different AND `progress.txt` has content beyond the header:
-   - Create archive folder: `archive/YYYY-MM-DD-feature-name/`
-   - Copy current `prd.json` and `progress.txt` to archive
-   - Reset `progress.txt` with fresh header
+1. Read `scripts/ralph/prd.json` if it exists
+2. If `branchName` differs:
+   - Create `scripts/ralph/archive/YYYY-MM-DD-[old-branch]/`
+   - Copy `prd.json` and `progress.txt` there
+   - If the old `prd.json` was bus mode, also copy `scripts/ralph/busses/[old-slug]/`
+   - Reset `progress.txt` with a fresh header
 
-**The ralph.sh script handles this automatically** when you run it, but if you are manually updating prd.json between runs, archive first.
+### Bus Mode Checklist
 
----
-
-## Checklist Before Saving
-
-Before writing prd.json, verify:
-
-- [ ] **Previous run archived** (if prd.json exists with different branchName, archive it first)
-- [ ] Each story is completable in one iteration (small enough)
-- [ ] Stories are ordered by dependency (schema to backend to UI)
-- [ ] Every story has "Typecheck passes" as criterion
-- [ ] UI stories have "Verify in browser using dev-browser skill" as criterion
-- [ ] Acceptance criteria are verifiable (not vague)
+- [ ] Previous run archived if `prd.json` exists with a different `branchName`
+- [ ] All `prd-NN-*.md` files read in filename order
+- [ ] Story IDs namespaced by filename stem
+- [ ] `passes` preserved from existing sub-files by ID match
+- [ ] Sub-files written to `scripts/ralph/busses/[slug]/` (not to `scripts/ralph/` root)
+- [ ] `prd.json` is manifest only (`busses` array, no `userStories`)
+- [ ] Every story has "Typecheck passes"
+- [ ] UI stories have "Verify in browser using dev-browser skill"
 - [ ] No story depends on a later story
