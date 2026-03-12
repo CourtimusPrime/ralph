@@ -6,7 +6,7 @@ user-invocable: true
 
 # Bus — Multi-PRD Generator
 
-Break a feature description into multiple focused sub-PRD markdown files that work together as a bus set. Each file covers one domain of the feature. Files are later compiled into `scripts/ralph/prd.json` by running `/ralph-bus tasks/[feature-slug]`.
+Break a feature description into multiple focused sub-PRD markdown files that work together as a bus set. Each file covers one domain of the feature. Files are later compiled into `scripts/ralph/prd.json` by running `/ralph tasks/[feature-slug]`.
 
 **This skill generates markdown planning files only. Do NOT implement anything.**
 

@@ -1,16 +1,16 @@
 ---
-name: ralph-bus
-description: "Compile a bus folder of sub-PRD markdown files into Ralph's bus prd.json format. Use when you have a tasks/[slug]/ folder with prd-NN-*.md files. Triggers on: /ralph-bus, compile bus, ralph bus, bus to prd."
+name: bus-prd
+description: "Compile a bus folder of sub-PRD markdown files into Ralph's bus prd.json format. Use when you have a tasks/[slug]/ folder with prd-NN-*.md files. Triggers on: /bus-prd, compile bus, ralph bus, bus to prd."
 user-invocable: true
 ---
 
-# Ralph Bus Compiler
+# Bus PRD Compiler
 
 Compiles a folder of sub-PRD markdown files into Ralph's bus format:
 - One `scripts/ralph/busses/[slug]/prd-NN-[scope].json` per source file (each owns its stories)
 - `scripts/ralph/prd.json` as a manifest pointing to the sub-files
 
-**Usage:** `/ralph-bus tasks/budget-tracker`
+**Usage:** `/bus-prd tasks/budget-tracker`
 
 ---
 
